@@ -108,6 +108,26 @@
     .btn:hover { opacity: 0.85; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    .btn-blog {
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #1a1a1a;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .btn-blog:hover { border-color: #FF00AA; color: #FF00AA; }
+    .btn-blog:disabled { opacity: 0.5; cursor: not-allowed; }
+
     .sources {
       display: flex;
       gap: 8px;
@@ -129,11 +149,47 @@
     .dot { width: 6px; height: 6px; border-radius: 50%; }
     .dot-zd { background: #0088FF; }
     .dot-rm { background: #FF00AA; }
+    .dot-blog { background: #00AA44; }
+
+    .blog-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .blog-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .blog-section-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .blog-note {
+      font-size: 12px;
+      color: #bbb;
+      margin-bottom: 10px;
+    }
 
     .status {
       font-size: 13px;
       color: #888;
       margin-bottom: 1rem;
+      min-height: 20px;
+    }
+
+    .blog-status {
+      font-size: 13px;
+      color: #888;
+      margin-top: 10px;
       min-height: 20px;
     }
 
@@ -179,6 +235,7 @@
 
     .badge-zd { background: rgba(0,136,255,0.1); color: #0066CC; }
     .badge-rm { background: rgba(255,0,170,0.1); color: #CC0088; }
+    .badge-blog { background: rgba(0,170,68,0.1); color: #007733; }
 
     .result-info { flex: 1; min-width: 0; }
 
@@ -248,16 +305,32 @@
     </div>
 
     <div class="sources">
-      <div class="source-tag"><span class="dot dot-zd"></span> Zendesk Help Center</div>
-      <div class="source-tag"><span class="dot dot-rm"></span> README Docs</div>
+      <div class="source-tag"><span class="dot dot-zd"></span> Knowledge Base</div>
+      <div class="source-tag"><span class="dot dot-rm"></span> Developer Guide</div>
     </div>
 
     <div class="status" id="status"></div>
     <div id="results"></div>
+
+    <div class="blog-section">
+      <div class="blog-section-header">
+        <div class="blog-section-title">
+          <span class="dot dot-blog"></span> Blog
+        </div>
+        <button class="btn-blog" id="blogBtn" onclick="checkBlog()">
+          <i class="ti ti-brand-blogger"></i> Шукати в блозі
+        </button>
+      </div>
+      <div class="blog-note">Пошук може тривати до 30 хвилин</div>
+      <div class="blog-status" id="blogStatus"></div>
+      <div id="blogResults"></div>
+    </div>
   </div>
 </div>
 
 <script>
+  let blogPollInterval = null;
+
   async function checkLink() {
     const url = document.getElementById('urlInput').value.trim();
     if (!url) return;
@@ -290,25 +363,99 @@
         results.innerHTML =
           `<div class="count-badge"><strong>${list.length}</strong> ${word} містить цей лінк</div>` +
           '<div class="results">' +
-          list.map(r => `
-            <div class="result-card">
-              <span class="source-badge ${r.source === 'Zendesk Help Center' ? 'badge-zd' : 'badge-rm'}">
-                ${r.source === 'Zendesk Help Center' ? 'Zendesk' : 'README'}
-              </span>
-              <div class="result-info">
-                <div class="result-title">${r.title || r.url}</div>
-                <div class="result-url">${r.url}</div>
+          list.map(r => {
+            let badgeClass = 'badge-rm';
+            let badgeLabel = 'Developer Guide';
+            if (r.source === 'Zendesk Help Center') { badgeClass = 'badge-zd'; badgeLabel = 'Knowledge Base'; }
+            return `
+              <div class="result-card">
+                <span class="source-badge ${badgeClass}">${badgeLabel}</span>
+                <div class="result-info">
+                  <div class="result-title">${r.title || r.url}</div>
+                  <div class="result-url">${r.url}</div>
+                </div>
+                <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
               </div>
-              <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
-            </div>
-          `).join('') +
+            `;
+          }).join('') +
           '</div>';
       }
     } catch (e) {
-      status.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Помилка з\'єднання з n8n. Перевір чи workflow активний.</span>';
+      status.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Помилка з\'єднання з n8n.</span>';
     }
 
     btn.disabled = false;
+  }
+
+  async function checkBlog() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) { alert('Спочатку введи лінк'); return; }
+
+    const btn = document.getElementById('blogBtn');
+    const blogStatus = document.getElementById('blogStatus');
+    const blogResults = document.getElementById('blogResults');
+
+    if (blogPollInterval) clearInterval(blogPollInterval);
+
+    btn.disabled = true;
+    blogStatus.innerHTML = '<span class="spinner"></span> Запускаємо сканування блогу...';
+    blogResults.innerHTML = '';
+
+    try {
+      const res = await fetch('https://n8n.macpaw.dev/webhook/blog-scanner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+
+      const data = await res.json();
+      const jobId = data.jobId;
+
+      if (!jobId) throw new Error('No jobId');
+
+      blogStatus.innerHTML = '<span class="spinner"></span> Сканування в процесі...';
+
+      blogPollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`https://n8n.macpaw.dev/webhook/blog-status?jobId=${jobId}`);
+          const statusData = await statusRes.json();
+          const job = Array.isArray(statusData) ? statusData[0] : statusData;
+
+          if (job && job.status === 'done') {
+            clearInterval(blogPollInterval);
+            btn.disabled = false;
+
+            const list = job.results ? JSON.parse(job.results) : [];
+
+            if (list.length === 0) {
+              blogStatus.innerHTML = '';
+              blogResults.innerHTML = '<div class="empty"><i class="ti ti-circle-check"></i>Лінк не знайдено в блозі</div>';
+            } else {
+              const word = list.length === 1 ? 'стаття' : list.length < 5 ? 'статті' : 'статей';
+              blogStatus.innerHTML = '';
+              blogResults.innerHTML =
+                `<div class="count-badge"><strong>${list.length}</strong> ${word} в блозі містить цей лінк</div>` +
+                '<div class="results">' +
+                list.map(r => `
+                  <div class="result-card">
+                    <span class="source-badge badge-blog">Blog</span>
+                    <div class="result-info">
+                      <div class="result-title">${r.title || r.url}</div>
+                      <div class="result-url">${r.url}</div>
+                    </div>
+                    <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
+                  </div>
+                `).join('') +
+                '</div>';
+            }
+          }
+        } catch (e) {}
+      }, 5000);
+
+    } catch (e) {
+      blogStatus.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Помилка запуску сканування блогу.</span>';
+      btn.disabled = false;
+    }
   }
 
   document.getElementById('urlInput').addEventListener('keydown', e => {
