@@ -330,7 +330,6 @@
 
 <script>
   let blogPollInterval = null;
-  let blogPollIntervals = [];
 
   async function checkLink() {
     const url = document.getElementById('urlInput').value.trim();
@@ -396,92 +395,62 @@
     const blogStatus = document.getElementById('blogStatus');
     const blogResults = document.getElementById('blogResults');
 
-    // Clear any existing polls
-    blogPollIntervals.forEach(id => clearInterval(id));
-    blogPollIntervals = [];
+    if (blogPollInterval) clearInterval(blogPollInterval);
 
     btn.disabled = true;
     blogStatus.innerHTML = '<span class="spinner"></span> Запускаємо сканування блогу...';
     blogResults.innerHTML = '';
 
     try {
-      // Launch 3 parallel jobs with different offsets
-      const offsets = [0, 500, 1000];
-      const jobResponses = await Promise.all(offsets.map(offset =>
-        fetch('https://n8n.macpaw.dev/webhook/blog-scanner', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, offset })
-        }).then(r => r.json())
-      ));
-
-      const jobIds = jobResponses.map(d => d.jobId);
-      if (jobIds.some(id => !id)) throw new Error('Missing jobId');
-
-      // Track state per job
-      const jobState = jobIds.reduce((acc, id) => {
-        acc[id] = { done: false, results: [] };
-        return acc;
-      }, {});
-
-      blogStatus.innerHTML = '<span class="spinner"></span> Сканування в процесі (0 / 3 частин готово)...';
-
-      function renderResults() {
-        const doneCount = Object.values(jobState).filter(s => s.done).length;
-        const allDone = doneCount === 3;
-
-        if (!allDone) {
-          blogStatus.innerHTML = `<span class="spinner"></span> Сканування в процесі (${doneCount} / 3 частин готово)...`;
-          return;
-        }
-
-        btn.disabled = false;
-        blogPollIntervals.forEach(id => clearInterval(id));
-        blogPollIntervals = [];
-
-        const allResults = Object.values(jobState).flatMap(s => s.results);
-
-        if (allResults.length === 0) {
-          blogStatus.innerHTML = '';
-          blogResults.innerHTML = '<div class="empty"><i class="ti ti-circle-check"></i>Лінк не знайдено в блозі</div>';
-        } else {
-          const word = allResults.length === 1 ? 'стаття' : allResults.length < 5 ? 'статті' : 'статей';
-          blogStatus.innerHTML = '';
-          blogResults.innerHTML =
-            `<div class="count-badge"><strong>${allResults.length}</strong> ${word} в блозі містить цей лінк</div>` +
-            '<div class="results">' +
-            allResults.map(r => `
-              <div class="result-card">
-                <span class="source-badge badge-blog">Blog</span>
-                <div class="result-info">
-                  <div class="result-title">${r.title || r.url}</div>
-                  <div class="result-url">${r.url}</div>
-                </div>
-                <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
-              </div>
-            `).join('') +
-            '</div>';
-        }
-      }
-
-      // Poll each job independently
-      jobIds.forEach(jobId => {
-        const intervalId = setInterval(async () => {
-          if (jobState[jobId].done) return;
-          try {
-            const statusRes = await fetch(`https://n8n.macpaw.dev/webhook/blog-status?jobId=${jobId}`);
-            const statusData = await statusRes.json();
-            const job = Array.isArray(statusData) ? statusData[0] : statusData;
-
-            if (job && job.status === 'done') {
-              jobState[jobId].done = true;
-              jobState[jobId].results = job.results ? JSON.parse(job.results) : [];
-              renderResults();
-            }
-          } catch (e) {}
-        }, 5000);
-        blogPollIntervals.push(intervalId);
+      const res = await fetch('https://n8n.macpaw.dev/webhook/blog-scanner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
       });
+
+      const data = await res.json();
+      const jobId = data.jobId;
+
+      if (!jobId) throw new Error('No jobId');
+
+      blogStatus.innerHTML = '<span class="spinner"></span> Сканування в процесі...';
+
+      blogPollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`https://n8n.macpaw.dev/webhook/blog-status?jobId=${jobId}`);
+          const statusData = await statusRes.json();
+          const job = Array.isArray(statusData) ? statusData[0] : statusData;
+
+          if (job && job.status === 'done') {
+            clearInterval(blogPollInterval);
+            btn.disabled = false;
+
+            const list = job.results ? JSON.parse(job.results) : [];
+
+            if (list.length === 0) {
+              blogStatus.innerHTML = '';
+              blogResults.innerHTML = '<div class="empty"><i class="ti ti-circle-check"></i>Лінк не знайдено в блозі</div>';
+            } else {
+              const word = list.length === 1 ? 'стаття' : list.length < 5 ? 'статті' : 'статей';
+              blogStatus.innerHTML = '';
+              blogResults.innerHTML =
+                `<div class="count-badge"><strong>${list.length}</strong> ${word} в блозі містить цей лінк</div>` +
+                '<div class="results">' +
+                list.map(r => `
+                  <div class="result-card">
+                    <span class="source-badge badge-blog">Blog</span>
+                    <div class="result-info">
+                      <div class="result-title">${r.title || r.url}</div>
+                      <div class="result-url">${r.url}</div>
+                    </div>
+                    <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
+                  </div>
+                `).join('') +
+                '</div>';
+            }
+          }
+        } catch (e) {}
+      }, 5000);
 
     } catch (e) {
       blogStatus.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Помилка запуску сканування блогу.</span>';
