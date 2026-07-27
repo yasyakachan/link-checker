@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,36 +10,28 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f5f5f5;
+      background: #f5f5f7;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1rem;
+      padding: 3rem 1.5rem 2rem;
       color: #1a1a1a;
     }
 
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      border: 1px solid #e5e5e5;
+    .page-header {
       width: 100%;
-      max-width: 680px;
-      overflow: hidden;
-    }
-
-    .header {
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid #f0f0f0;
+      max-width: 720px;
+      margin-bottom: 2rem;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       background: #FF00AA;
       display: flex;
       align-items: center;
@@ -47,72 +39,76 @@
       flex-shrink: 0;
     }
 
-    .logo i { color: #fff; font-size: 18px; }
+    .logo i { color: #fff; font-size: 22px; }
 
-    .header-text h1 {
-      font-size: 17px;
-      font-weight: 600;
-      color: #1a1a1a;
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #000;
+      letter-spacing: -0.5px;
     }
 
-    .header-text p {
-      font-size: 13px;
-      color: #888;
-      margin-top: 1px;
-    }
-
-    .body { padding: 1.75rem 2rem; }
-
-    .input-row {
-      display: flex;
-      gap: 8px;
+    .search-wrap {
+      width: 100%;
+      max-width: 720px;
+      position: relative;
       margin-bottom: 1rem;
     }
 
-    .input-row input {
-      flex: 1;
-      height: 42px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 0 14px;
-      font-size: 14px;
+    .search-wrap input {
+      width: 100%;
+      height: 48px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 0 44px 0 16px;
+      font-size: 15px;
       color: #1a1a1a;
       outline: none;
+      background: #fff;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .input-row input:focus {
+    .search-wrap input:focus {
       border-color: #FF00AA;
       box-shadow: 0 0 0 3px rgba(255, 0, 170, 0.1);
     }
 
-    .input-row input::placeholder { color: #bbb; }
+    .search-wrap input::placeholder { color: #bbb; }
 
-    .btn {
-      height: 42px;
-      padding: 0 20px;
-      border-radius: 10px;
+    .clear-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
       border: none;
-      background: #FF00AA;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 500;
       cursor: pointer;
-      display: flex;
+      color: #bbb;
+      display: none;
       align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      transition: opacity 0.15s;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 50%;
+      transition: color 0.15s, background 0.15s;
     }
 
-    .btn:hover { opacity: 0.85; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .clear-btn:hover { color: #666; background: #f0f0f0; }
+    .clear-btn.visible { display: flex; }
 
-    .btn-blog {
-      height: 42px;
-      padding: 0 20px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
+    .actions {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 720px;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 20px;
+      border: 1.5px solid #e0e0e0;
       background: #fff;
       color: #1a1a1a;
       font-size: 14px;
@@ -120,77 +116,78 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       white-space: nowrap;
       transition: all 0.15s;
     }
 
-    .btn-blog:hover { border-color: #FF00AA; color: #FF00AA; }
-    .btn-blog:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .sources {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
+    .btn-action:hover:not(:disabled) {
+      border-color: #FF00AA;
+      color: #FF00AA;
     }
 
-    .source-tag {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid #eee;
-      color: #888;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+    .btn-action.active {
+      background: #FF00AA;
+      border-color: #FF00AA;
+      color: #fff;
     }
 
-    .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-action .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
     .dot-zd { background: #0088FF; }
     .dot-rm { background: #FF00AA; }
-    .dot-blog { background: #00AA44; }
+    .dot-blog { background: #34C759; }
+    .dot-email { background: #FFCC00; }
 
-    .blog-section {
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid #f0f0f0;
+    .btn-action.active .dot-zd { background: rgba(255,255,255,0.8); }
+    .btn-action.active .dot-rm { background: rgba(255,255,255,0.8); }
+    .btn-action.active .dot-blog { background: rgba(255,255,255,0.8); }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e8e8e8;
+      width: 100%;
+      max-width: 720px;
+      overflow: hidden;
+      margin-bottom: 12px;
     }
 
-    .blog-section-header {
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f0f0f0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
     }
 
-    .blog-section-title {
-      font-size: 14px;
-      font-weight: 500;
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
       color: #1a1a1a;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
+    }
+
+    .card-body { padding: 1.25rem 1.5rem; }
+
+    .status {
+      font-size: 13px;
+      color: #888;
+      min-height: 20px;
     }
 
     .blog-note {
       font-size: 12px;
       color: #bbb;
-      margin-bottom: 10px;
-    }
-
-    .status {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 1rem;
-      min-height: 20px;
-    }
-
-    .blog-status {
-      font-size: 13px;
-      color: #888;
-      margin-top: 10px;
-      min-height: 20px;
     }
 
     .spinner {
@@ -207,7 +204,7 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .results { display: flex; flex-direction: column; gap: 8px; }
+    .results { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 
     .result-card {
       background: #fafafa;
@@ -235,7 +232,7 @@
 
     .badge-zd { background: rgba(0,136,255,0.1); color: #0066CC; }
     .badge-rm { background: rgba(255,0,170,0.1); color: #CC0088; }
-    .badge-blog { background: rgba(0,170,68,0.1); color: #007733; }
+    .badge-blog { background: rgba(52,199,89,0.12); color: #1a7a36; }
 
     .result-info { flex: 1; min-width: 0; }
 
@@ -268,80 +265,120 @@
 
     .empty {
       text-align: center;
-      padding: 3rem 1rem;
+      padding: 2rem 1rem;
       color: #bbb;
+      font-size: 13px;
     }
 
-    .empty i { font-size: 40px; display: block; margin-bottom: 8px; }
+    .empty i { font-size: 32px; display: block; margin-bottom: 8px; color: #ddd; }
 
     .count-badge {
       font-size: 13px;
       color: #888;
-      margin-bottom: 1rem;
+      margin-bottom: 4px;
     }
 
     .count-badge strong { color: #1a1a1a; }
 
     .error-msg { color: #cc0000; font-size: 13px; }
+
+    .nothing-found {
+      font-size: 13px;
+      color: #bbb;
+      padding: 0.5rem 0;
+    }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <div class="header">
-    <div class="logo"><i class="ti ti-link"></i></div>
-    <div class="header-text">
-      <h1>Link Checker</h1>
-      <p>Знайди де використовується лінк перед видаленням</p>
+<div class="page-header">
+  <div class="logo"><i class="ti ti-link"></i></div>
+  <h1 class="page-title">Link Checker</h1>
+</div>
+
+<div class="search-wrap">
+  <input type="text" id="urlInput" placeholder="https://setapp.com/pricing" />
+  <button class="clear-btn" id="clearBtn" onclick="clearInput()" title="Clear">
+    <i class="ti ti-x" style="font-size:16px;"></i>
+  </button>
+</div>
+
+<div class="actions">
+  <button class="btn-action" id="btnGuides" onclick="checkLink()">
+    <span class="dot dot-rm"></span> Search in Guides
+  </button>
+  <button class="btn-action" id="btnBlog" onclick="checkBlog()">
+    <span class="dot dot-blog"></span> Search in Blog
+  </button>
+  <button class="btn-action" id="btnEmail" disabled title="Coming soon">
+    <span class="dot dot-email"></span> Search in Emails
+  </button>
+</div>
+
+<!-- Guides results card -->
+<div class="card" id="guidesCard" style="display:none;">
+  <div class="card-header">
+    <div class="card-title">
+      <span class="dot dot-rm"></span> Guides
     </div>
+    <span class="blog-note" id="guidesNote"></span>
   </div>
+  <div class="card-body">
+    <div class="status" id="guidesStatus"></div>
+    <div id="guidesResults"></div>
+  </div>
+</div>
 
-  <div class="body">
-    <div class="input-row">
-      <input type="text" id="urlInput" placeholder="https://setapp.com/pricing" />
-      <button class="btn" id="checkBtn" onclick="checkLink()">
-        <i class="ti ti-search"></i> Перевірити
-      </button>
+<!-- Blog results card -->
+<div class="card" id="blogCard" style="display:none;">
+  <div class="card-header">
+    <div class="card-title">
+      <span class="dot dot-blog"></span> Blog
     </div>
-
-    <div class="sources">
-      <div class="source-tag"><span class="dot dot-zd"></span> Knowledge Base</div>
-      <div class="source-tag"><span class="dot dot-rm"></span> Developer Guide</div>
-    </div>
-
-    <div class="status" id="status"></div>
-    <div id="results"></div>
-
-    <div class="blog-section">
-      <div class="blog-section-header">
-        <div class="blog-section-title">
-          <span class="dot dot-blog"></span> Blog
-        </div>
-        <button class="btn-blog" id="blogBtn" onclick="checkBlog()">
-          <i class="ti ti-brand-blogger"></i> Шукати в блозі
-        </button>
-      </div>
-      <div class="blog-note">Пошук може тривати до 30 хвилин</div>
-      <div class="blog-status" id="blogStatus"></div>
-      <div id="blogResults"></div>
-    </div>
+    <span class="blog-note" id="blogNote"></span>
+  </div>
+  <div class="card-body">
+    <div class="status" id="blogStatus"></div>
+    <div id="blogResults"></div>
   </div>
 </div>
 
 <script>
-  let blogPollInterval = null;
+  let blogPollIntervals = [];
+
+  const urlInput = document.getElementById('urlInput');
+  const clearBtn = document.getElementById('clearBtn');
+
+  urlInput.addEventListener('input', () => {
+    clearBtn.classList.toggle('visible', urlInput.value.length > 0);
+  });
+
+  urlInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkLink();
+  });
+
+  function clearInput() {
+    urlInput.value = '';
+    clearBtn.classList.remove('visible');
+    urlInput.focus();
+  }
 
   async function checkLink() {
-    const url = document.getElementById('urlInput').value.trim();
+    const url = urlInput.value.trim();
     if (!url) return;
 
-    const btn = document.getElementById('checkBtn');
-    const status = document.getElementById('status');
-    const results = document.getElementById('results');
+    const btn = document.getElementById('btnGuides');
+    const guidesCard = document.getElementById('guidesCard');
+    const guidesStatus = document.getElementById('guidesStatus');
+    const guidesResults = document.getElementById('guidesResults');
+    const guidesNote = document.getElementById('guidesNote');
 
     btn.disabled = true;
-    status.innerHTML = '<span class="spinner"></span> Сканування...';
-    results.innerHTML = '';
+    btn.classList.add('active');
+    guidesCard.style.display = 'block';
+    guidesStatus.innerHTML = '<span class="spinner"></span> Scanning…';
+    guidesResults.innerHTML = '';
+    guidesNote.textContent = '';
 
     try {
       const res = await fetch('https://n8n.macpaw.dev/webhook/link-checker', {
@@ -354,14 +391,14 @@
       const items = Array.isArray(data) ? data[0] : data;
       const list = items.results || [];
 
+      guidesStatus.innerHTML = '';
+
       if (list.length === 0) {
-        status.innerHTML = '';
-        results.innerHTML = '<div class="empty"><i class="ti ti-circle-check"></i>Лінк не знайдено в жодній статті</div>';
+        guidesResults.innerHTML = '<div class="nothing-found"><i class="ti ti-circle-x" style="color:#ddd;margin-right:6px;"></i>Nothing found</div>';
       } else {
-        const word = list.length === 1 ? 'стаття' : list.length < 5 ? 'статті' : 'статей';
-        status.innerHTML = '';
-        results.innerHTML =
-          `<div class="count-badge"><strong>${list.length}</strong> ${word} містить цей лінк</div>` +
+        const word = list.length === 1 ? 'article' : 'articles';
+        guidesNote.textContent = `${list.length} ${word}`;
+        guidesResults.innerHTML =
           '<div class="results">' +
           list.map(r => {
             let badgeClass = 'badge-rm';
@@ -381,86 +418,116 @@
           '</div>';
       }
     } catch (e) {
-      status.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Помилка з\'єднання з n8n.</span>';
+      guidesStatus.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Connection error.</span>';
     }
 
     btn.disabled = false;
+    btn.classList.remove('active');
   }
 
   async function checkBlog() {
-    const url = document.getElementById('urlInput').value.trim();
-    if (!url) { alert('Спочатку введи лінк'); return; }
+    const url = urlInput.value.trim();
+    if (!url) { alert('Please enter a link first'); return; }
 
-    const btn = document.getElementById('blogBtn');
+    const btn = document.getElementById('btnBlog');
+    const blogCard = document.getElementById('blogCard');
     const blogStatus = document.getElementById('blogStatus');
     const blogResults = document.getElementById('blogResults');
+    const blogNote = document.getElementById('blogNote');
 
-    if (blogPollInterval) clearInterval(blogPollInterval);
+    blogPollIntervals.forEach(id => clearInterval(id));
+    blogPollIntervals = [];
 
     btn.disabled = true;
-    blogStatus.innerHTML = '<span class="spinner"></span> Запускаємо сканування блогу...';
+    btn.classList.add('active');
+    blogCard.style.display = 'block';
+    blogStatus.innerHTML = '<span class="spinner"></span> Starting scan…';
     blogResults.innerHTML = '';
+    blogNote.textContent = 'Search may take up to 3 minutes';
 
     try {
-      const res = await fetch('https://n8n.macpaw.dev/webhook/blog-scanner', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
+      const offsets = [0, 500, 1000];
+      const jobResponses = await Promise.all(offsets.map(offset =>
+        fetch('https://n8n.macpaw.dev/webhook/blog-scanner', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, offset })
+        }).then(r => r.json())
+      ));
+
+      const jobIds = jobResponses.map(d => d.jobId);
+      if (jobIds.some(id => !id)) throw new Error('Missing jobId');
+
+      const jobState = jobIds.reduce((acc, id) => {
+        acc[id] = { done: false, results: [] };
+        return acc;
+      }, {});
+
+      blogStatus.innerHTML = '<span class="spinner"></span> Scanning… (0 / 3 parts done)';
+
+      function renderResults() {
+        const doneCount = Object.values(jobState).filter(s => s.done).length;
+        const allDone = doneCount === 3;
+
+        if (!allDone) {
+          blogStatus.innerHTML = `<span class="spinner"></span> Scanning… (${doneCount} / 3 parts done)`;
+          return;
+        }
+
+        btn.disabled = false;
+        btn.classList.remove('active');
+        blogPollIntervals.forEach(id => clearInterval(id));
+        blogPollIntervals = [];
+
+        const allResults = Object.values(jobState).flatMap(s => s.results);
+        blogNote.textContent = '';
+
+        if (allResults.length === 0) {
+          blogStatus.innerHTML = '';
+          blogResults.innerHTML = '<div class="nothing-found"><i class="ti ti-circle-x" style="color:#ddd;margin-right:6px;"></i>Nothing found</div>';
+        } else {
+          const word = allResults.length === 1 ? 'article' : 'articles';
+          blogNote.textContent = `${allResults.length} ${word}`;
+          blogStatus.innerHTML = '';
+          blogResults.innerHTML =
+            '<div class="results">' +
+            allResults.map(r => `
+              <div class="result-card">
+                <span class="source-badge badge-blog">Blog</span>
+                <div class="result-info">
+                  <div class="result-title">${r.title || r.url}</div>
+                  <div class="result-url">${r.url}</div>
+                </div>
+                <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
+              </div>
+            `).join('') +
+            '</div>';
+        }
+      }
+
+      jobIds.forEach(jobId => {
+        const intervalId = setInterval(async () => {
+          if (jobState[jobId].done) return;
+          try {
+            const statusRes = await fetch(`https://n8n.macpaw.dev/webhook/blog-status?jobId=${jobId}`);
+            const statusData = await statusRes.json();
+            const job = Array.isArray(statusData) ? statusData[0] : statusData;
+            if (job && job.status === 'done') {
+              jobState[jobId].done = true;
+              jobState[jobId].results = job.results ? JSON.parse(job.results) : [];
+              renderResults();
+            }
+          } catch (e) {}
+        }, 5000);
+        blogPollIntervals.push(intervalId);
       });
 
-      const data = await res.json();
-      const jobId = data.jobId;
-
-      if (!jobId) throw new Error('No jobId');
-
-      blogStatus.innerHTML = '<span class="spinner"></span> Сканування в процесі...';
-
-      blogPollInterval = setInterval(async () => {
-        try {
-          const statusRes = await fetch(`https://n8n.macpaw.dev/webhook/blog-status?jobId=${jobId}`);
-          const statusData = await statusRes.json();
-          const job = Array.isArray(statusData) ? statusData[0] : statusData;
-
-          if (job && job.status === 'done') {
-            clearInterval(blogPollInterval);
-            btn.disabled = false;
-
-            const list = job.results ? JSON.parse(job.results) : [];
-
-            if (list.length === 0) {
-              blogStatus.innerHTML = '';
-              blogResults.innerHTML = '<div class="empty"><i class="ti ti-circle-check"></i>Лінк не знайдено в блозі</div>';
-            } else {
-              const word = list.length === 1 ? 'стаття' : list.length < 5 ? 'статті' : 'статей';
-              blogStatus.innerHTML = '';
-              blogResults.innerHTML =
-                `<div class="count-badge"><strong>${list.length}</strong> ${word} в блозі містить цей лінк</div>` +
-                '<div class="results">' +
-                list.map(r => `
-                  <div class="result-card">
-                    <span class="source-badge badge-blog">Blog</span>
-                    <div class="result-info">
-                      <div class="result-title">${r.title || r.url}</div>
-                      <div class="result-url">${r.url}</div>
-                    </div>
-                    <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
-                  </div>
-                `).join('') +
-                '</div>';
-            }
-          }
-        } catch (e) {}
-      }, 5000);
-
     } catch (e) {
-      blogStatus.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Помилка запуску сканування блогу.</span>';
+      blogStatus.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Failed to start scan.</span>';
       btn.disabled = false;
+      btn.classList.remove('active');
     }
   }
-
-  document.getElementById('urlInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkLink();
-  });
 </script>
 
 </body>
