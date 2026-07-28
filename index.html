@@ -310,7 +310,7 @@
   <button class="btn-action" id="btnBlog" onclick="checkBlog()">
     <span class="dot dot-blog"></span> Search in Blog
   </button>
-  <button class="btn-action" id="btnEmail" disabled title="Coming soon">
+  <button class="btn-action" id="btnEmail" onclick="checkEmail()">
     <span class="dot dot-email"></span> Search in Emails
   </button>
 </div>
@@ -326,6 +326,20 @@
   <div class="card-body">
     <div class="status" id="guidesStatus"></div>
     <div id="guidesResults"></div>
+  </div>
+</div>
+
+<!-- Email results card -->
+<div class="card" id="emailCard" style="display:none;">
+  <div class="card-header">
+    <div class="card-title">
+      <span class="dot dot-email"></span> Emails
+    </div>
+    <span class="blog-note" id="emailNote"></span>
+  </div>
+  <div class="card-body">
+    <div class="status" id="emailStatus"></div>
+    <div id="emailResults"></div>
   </div>
 </div>
 
@@ -345,6 +359,7 @@
 
 <script>
   let blogPollIntervals = [];
+  let emailPollInterval = null;
 
   const urlInput = document.getElementById('urlInput');
   const clearBtn = document.getElementById('clearBtn');
@@ -524,6 +539,83 @@
 
     } catch (e) {
       blogStatus.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Failed to start scan.</span>';
+      btn.disabled = false;
+      btn.classList.remove('active');
+    }
+  }
+  async function checkEmail() {
+    const url = urlInput.value.trim();
+    if (!url) { alert('Please enter a link first'); return; }
+
+    const btn = document.getElementById('btnEmail');
+    const emailCard = document.getElementById('emailCard');
+    const emailStatus = document.getElementById('emailStatus');
+    const emailResults = document.getElementById('emailResults');
+    const emailNote = document.getElementById('emailNote');
+
+    if (emailPollInterval) clearInterval(emailPollInterval);
+
+    btn.disabled = true;
+    btn.classList.add('active');
+    emailCard.style.display = 'block';
+    emailStatus.innerHTML = '<span class="spinner"></span> Starting scan…';
+    emailResults.innerHTML = '';
+    emailNote.textContent = 'Search may take a few minutes';
+
+    try {
+      const res = await fetch('https://n8n.macpaw.dev/webhook/email-scanner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+
+      const data = await res.json();
+      const jobId = data.jobId;
+      if (!jobId) throw new Error('Missing jobId');
+
+      emailStatus.innerHTML = '<span class="spinner"></span> Scanning emails…';
+
+      emailPollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`https://n8n.macpaw.dev/webhook/blog-status?jobId=${jobId}`);
+          const statusData = await statusRes.json();
+          const job = Array.isArray(statusData) ? statusData[0] : statusData;
+
+          if (job && job.status === 'done') {
+            clearInterval(emailPollInterval);
+            btn.disabled = false;
+            btn.classList.remove('active');
+
+            const list = job.results ? JSON.parse(job.results) : [];
+            emailNote.textContent = '';
+
+            if (list.length === 0) {
+              emailStatus.innerHTML = '';
+              emailResults.innerHTML = '<div class="nothing-found"><i class="ti ti-circle-x" style="color:#ddd;margin-right:6px;"></i>Nothing found</div>';
+            } else {
+              const word = list.length === 1 ? 'email' : 'emails';
+              emailNote.textContent = `${list.length} ${word}`;
+              emailStatus.innerHTML = '';
+              emailResults.innerHTML =
+                '<div class="results">' +
+                list.map(r => `
+                  <div class="result-card">
+                    <span class="source-badge" style="background:rgba(255,204,0,0.15);color:#996600;">Email</span>
+                    <div class="result-info">
+                      <div class="result-title">${r.name || r.previewUrl}</div>
+                      <div class="result-url">${r.previewUrl || ''}</div>
+                    </div>
+                    ${r.previewUrl ? `<a href="${r.previewUrl}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>` : ''}
+                  </div>
+                `).join('') +
+                '</div>';
+            }
+          }
+        } catch (e) {}
+      }, 5000);
+
+    } catch (e) {
+      emailStatus.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Failed to start scan.</span>';
       btn.disabled = false;
       btn.classList.remove('active');
     }
