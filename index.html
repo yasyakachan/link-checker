@@ -404,7 +404,7 @@
 
       const data = await res.json();
       const items = Array.isArray(data) ? data[0] : data;
-      const list = items.results || [];
+     const list = (items.results || []).filter(r => r.url);
 
       guidesStatus.innerHTML = '';
 
