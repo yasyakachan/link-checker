@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Link Checker</title>
+  <title>Setapp Docs Link Search</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,25 +24,14 @@
       max-width: 720px;
       margin-bottom: 2rem;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 14px;
     }
 
-    .logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: #FF00AA;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .logo i { color: #fff; font-size: 22px; }
+    .setapp-logo { height: 30px; width: auto; }
 
     .page-title {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
       color: #000;
       letter-spacing: -0.5px;
@@ -52,7 +41,7 @@
       width: 100%;
       max-width: 720px;
       position: relative;
-      margin-bottom: 1rem;
+      margin-bottom: 6px;
     }
 
     .search-wrap input {
@@ -95,18 +84,102 @@
     .clear-btn:hover { color: #666; background: #f0f0f0; }
     .clear-btn.visible { display: flex; }
 
-    .actions {
+    .search-hint {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .search-hint code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      background: #efefef;
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #666;
+    }
+
+    .info-btn {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid #ccc;
+      background: none;
+      color: #bbb;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: all 0.15s;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .info-btn:hover { border-color: #999; color: #666; }
+
+    .info-popover {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 300px;
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.6;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      z-index: 100;
+      text-align: left;
+    }
+
+    .info-popover.visible { display: block; }
+
+    .info-popover strong { color: #1a1a1a; display: block; margin-bottom: 6px; font-size: 12px; }
+
+    .info-popover code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      background: #f5f5f5;
+      padding: 1px 4px;
+      border-radius: 3px;
+      color: #555;
+    }
+
+    .info-popover ul { padding-left: 14px; margin-top: 6px; }
+    .info-popover li { margin-bottom: 3px; }
+    .info-popover hr { border: none; border-top: 1px solid #f0f0f0; margin: 10px 0; }
+
+    .card-header-right { display: flex; align-items: center; gap: 8px; position: relative; }
+
+    .actions-row {
       display: flex;
+      align-items: center;
       gap: 8px;
       width: 100%;
       max-width: 720px;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       flex-wrap: wrap;
     }
 
+    .search-in-label {
+      font-size: 13px;
+      color: #888;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
     .btn-action {
-      height: 40px;
-      padding: 0 18px;
+      height: 42px;
+      padding: 0 20px;
       border-radius: 20px;
       border: 1.5px solid #e0e0e0;
       background: #fff;
@@ -121,34 +194,38 @@
       transition: all 0.15s;
     }
 
-    .btn-action:hover:not(:disabled) {
-      border-color: #FF00AA;
-      color: #FF00AA;
-    }
-
-    .btn-action.active {
-      background: #FF00AA;
-      border-color: #FF00AA;
-      color: #fff;
-    }
-
+    .btn-action:hover:not(:disabled) { border-color: #FF00AA; color: #FF00AA; }
+    .btn-action.active { background: #FF00AA; border-color: #FF00AA; color: #fff; }
     .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .btn-action .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .dot-zd { background: #0088FF; }
+    .btn-action .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .dot-rm { background: #FF00AA; }
     .dot-blog { background: #34C759; }
     .dot-email { background: #FFCC00; }
+    .btn-action.active .dot { background: rgba(255,255,255,0.8); }
 
-    .btn-action.active .dot-zd { background: rgba(255,255,255,0.8); }
-    .btn-action.active .dot-rm { background: rgba(255,255,255,0.8); }
-    .btn-action.active .dot-blog { background: rgba(255,255,255,0.8); }
+    .divider { width: 1px; height: 20px; background: #e0e0e0; margin: 0 2px; }
+
+    .btn-clear-results {
+      height: 42px;
+      padding: 0 14px;
+      border-radius: 20px;
+      border: 1.5px solid #e0e0e0;
+      background: transparent;
+      color: #aaa;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: all 0.15s;
+      margin-left: auto;
+    }
+
+    .btn-clear-results:hover { border-color: #ccc; color: #666; }
+    .btn-clear-results.visible { display: flex; }
 
     .card {
       background: #fff;
@@ -177,18 +254,12 @@
       gap: 7px;
     }
 
+    .card-subtitle { font-size: 11px; color: #ccc; margin-top: 2px; }
+    .card-title-wrap { display: flex; flex-direction: column; gap: 1px; }
     .card-body { padding: 1.25rem 1.5rem; }
 
-    .status {
-      font-size: 13px;
-      color: #888;
-      min-height: 20px;
-    }
-
-    .blog-note {
-      font-size: 12px;
-      color: #bbb;
-    }
+    .status { font-size: 13px; color: #888; min-height: 20px; }
+    .card-note { font-size: 12px; color: #bbb; }
 
     .spinner {
       display: inline-block;
@@ -233,6 +304,7 @@
     .badge-zd { background: rgba(0,136,255,0.1); color: #0066CC; }
     .badge-rm { background: rgba(255,0,170,0.1); color: #CC0088; }
     .badge-blog { background: rgba(52,199,89,0.12); color: #1a7a36; }
+    .badge-email { background: rgba(255,204,0,0.15); color: #996600; }
 
     .result-info { flex: 1; min-width: 0; }
 
@@ -254,74 +326,68 @@
       text-overflow: ellipsis;
     }
 
-    .result-link {
-      color: #bbb;
-      text-decoration: none;
-      flex-shrink: 0;
-      transition: color 0.15s;
-    }
-
+    .result-link { color: #bbb; text-decoration: none; flex-shrink: 0; transition: color 0.15s; }
     .result-link:hover { color: #FF00AA; }
 
-    .empty {
-      text-align: center;
-      padding: 2rem 1rem;
-      color: #bbb;
-      font-size: 13px;
-    }
-
-    .empty i { font-size: 32px; display: block; margin-bottom: 8px; color: #ddd; }
-
-    .count-badge {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 4px;
-    }
-
-    .count-badge strong { color: #1a1a1a; }
-
+    .nothing-found { font-size: 13px; color: #bbb; padding: 0.5rem 0; }
     .error-msg { color: #cc0000; font-size: 13px; }
-
-    .nothing-found {
-      font-size: 13px;
-      color: #bbb;
-      padding: 0.5rem 0;
-    }
   </style>
 </head>
 <body>
 
 <div class="page-header">
-  <div class="logo"><i class="ti ti-link"></i></div>
-  <h1 class="page-title">Link Checker</h1>
+  <img src="https://raw.githubusercontent.com/yasyakachan/link-checker/main/Setapp%20logo-Simplified-Horizontal-by%20MacPaw-Light%20bg.png" alt="Setapp by MacPaw" class="setapp-logo" />
+  <h1 class="page-title">Where is this link used?</h1>
 </div>
 
 <div class="search-wrap">
-  <input type="text" id="urlInput" placeholder="https://setapp.com/pricing" />
+  <input type="text" id="urlInput" placeholder="https://setapp.com/apps/lazyreel" />
   <button class="clear-btn" id="clearBtn" onclick="clearInput()" title="Clear">
     <i class="ti ti-x" style="font-size:16px;"></i>
   </button>
 </div>
 
-<div class="actions">
+
+
+<div class="actions-row">
+  <span class="search-in-label">Search in:</span>
   <button class="btn-action" id="btnGuides" onclick="checkLink()">
-    <span class="dot dot-rm"></span> Search in Guides
+    <span class="dot dot-rm"></span> Guides
   </button>
   <button class="btn-action" id="btnBlog" onclick="checkBlog()">
-    <span class="dot dot-blog"></span> Search in Blog
+    <span class="dot dot-blog"></span> Blog
   </button>
   <button class="btn-action" id="btnEmail" onclick="checkEmail()">
-    <span class="dot dot-email"></span> Search in Emails
+    <span class="dot dot-email"></span> Emails
+  </button>
+  <div class="divider"></div>
+  <button class="btn-clear-results" id="btnClearResults" onclick="clearResults()">
+    <i class="ti ti-trash" style="font-size:13px;"></i> Clear results
   </button>
 </div>
 
 <!-- Guides results card -->
 <div class="card" id="guidesCard" style="display:none;">
   <div class="card-header">
-    <div class="card-title">
-      <span class="dot dot-rm"></span> Guides
+    <div class="card-title-wrap">
+      <div class="card-title"><span class="dot dot-rm"></span> Guides</div>
+      <div class="card-subtitle">support.setapp.com · setapp.com/developer</div>
     </div>
-    <span class="blog-note" id="guidesNote"></span>
+    <div class="card-header-right">
+      <span class="card-note" id="guidesNote"></span>
+      <button class="info-btn" onclick="toggleInfo('guidesInfo')">i
+        <div class="info-popover" id="guidesInfo">
+          <strong>How search works</strong>
+          Searches for an exact match of the URL you enter. Everything after <code>?</code> is ignored.<br>Enter the link exactly as it appears — <code>https://setapp.com</code>, not <code>www.setapp.com</code>.
+          <hr>
+          <strong>Sources</strong>
+          <ul>
+            <li>Knowledge Base — support.setapp.com</li>
+            <li>Developer Guide — setapp.com/developer</li>
+          </ul>
+        </div>
+      </button>
+    </div>
   </div>
   <div class="card-body">
     <div class="status" id="guidesStatus"></div>
@@ -329,27 +395,32 @@
   </div>
 </div>
 
-<!-- Email results card -->
-<div class="card" id="emailCard" style="display:none;">
-  <div class="card-header">
-    <div class="card-title">
-      <span class="dot dot-email"></span> Emails
-    </div>
-    <span class="blog-note" id="emailNote"></span>
-  </div>
-  <div class="card-body">
-    <div class="status" id="emailStatus"></div>
-    <div id="emailResults"></div>
-  </div>
-</div>
-
 <!-- Blog results card -->
 <div class="card" id="blogCard" style="display:none;">
   <div class="card-header">
-    <div class="card-title">
-      <span class="dot dot-blog"></span> Blog
+    <div class="card-title-wrap">
+      <div class="card-title"><span class="dot dot-blog"></span> Blog</div>
+      <div class="card-subtitle">setapp.com/how-to · /lifestyle · /app-reviews · /news</div>
     </div>
-    <span class="blog-note" id="blogNote"></span>
+    <div class="card-header-right">
+      <span class="card-note" id="blogNote"></span>
+      <button class="info-btn" onclick="toggleInfo('blogInfo')">i
+        <div class="info-popover" id="blogInfo">
+          <strong>How search works</strong>
+          Searches for an exact match of the URL you enter. Everything after <code>?</code> is ignored.<br>Enter the link exactly as it appears — <code>https://setapp.com</code>, not <code>www.setapp.com</code>.
+          <hr>
+          <strong>Sources</strong>
+          <ul>
+            <li>setapp.com/how-to</li>
+            <li>setapp.com/lifestyle</li>
+            <li>setapp.com/app-reviews</li>
+            <li>setapp.com/news</li>
+            <li>setapp.com/tech-talks</li>
+          </ul>
+          Scans up to 1,500 articles in 3 parallel batches.
+        </div>
+      </button>
+    </div>
   </div>
   <div class="card-body">
     <div class="status" id="blogStatus"></div>
@@ -357,12 +428,57 @@
   </div>
 </div>
 
+<!-- Email results card -->
+<div class="card" id="emailCard" style="display:none;">
+  <div class="card-header">
+    <div class="card-title-wrap">
+      <div class="card-title"><span class="dot dot-email"></span> Emails</div>
+      <div class="card-subtitle">Stripo · ~500 email templates</div>
+    </div>
+    <div class="card-header-right">
+      <span class="card-note" id="emailNote"></span>
+      <button class="info-btn" onclick="toggleInfo('emailInfo')">i
+        <div class="info-popover" id="emailInfo">
+          <strong>How search works</strong>
+          Searches for an exact match of the URL you enter. Everything after <code>?</code> is ignored.<br>Enter the link exactly as it appears — <code>https://setapp.com</code>, not <code>www.setapp.com</code>.
+          <hr>
+          <strong>Sources</strong>
+          <ul>
+            <li>All email templates stored in Stripo (~500)</li>
+          </ul>
+          Note: only links written directly in the template are found. Links inserted via snippets or dynamic variables are not searchable.
+        </div>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="status" id="emailStatus"></div>
+    <div id="emailResults"></div>
+  </div>
+</div>
+
 <script>
   let blogPollIntervals = [];
+
+  function toggleInfo(id) {
+    const popover = document.getElementById(id);
+    const isVisible = popover.classList.contains('visible');
+    // Close all popovers
+    document.querySelectorAll('.info-popover').forEach(p => p.classList.remove('visible'));
+    if (!isVisible) popover.classList.add('visible');
+  }
+
+  // Close popovers when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.info-btn')) {
+      document.querySelectorAll('.info-popover').forEach(p => p.classList.remove('visible'));
+    }
+  });
   let emailPollInterval = null;
 
   const urlInput = document.getElementById('urlInput');
   const clearBtn = document.getElementById('clearBtn');
+  const btnClearResults = document.getElementById('btnClearResults');
 
   urlInput.addEventListener('input', () => {
     clearBtn.classList.toggle('visible', urlInput.value.length > 0);
@@ -378,6 +494,29 @@
     urlInput.focus();
   }
 
+  function updateClearResultsBtn() {
+    const anyVisible =
+      document.getElementById('guidesCard').style.display !== 'none' ||
+      document.getElementById('blogCard').style.display !== 'none' ||
+      document.getElementById('emailCard').style.display !== 'none';
+    btnClearResults.classList.toggle('visible', anyVisible);
+  }
+
+  function clearResults() {
+    blogPollIntervals.forEach(id => clearInterval(id));
+    blogPollIntervals = [];
+    if (emailPollInterval) clearInterval(emailPollInterval);
+    ['guidesCard', 'blogCard', 'emailCard'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    ['btnGuides', 'btnBlog', 'btnEmail'].forEach(id => {
+      const btn = document.getElementById(id);
+      btn.disabled = false;
+      btn.classList.remove('active');
+    });
+    btnClearResults.classList.remove('visible');
+  }
+
   async function checkLink() {
     const url = urlInput.value.trim();
     if (!url) return;
@@ -391,6 +530,7 @@
     btn.disabled = true;
     btn.classList.add('active');
     guidesCard.style.display = 'block';
+    updateClearResultsBtn();
     guidesStatus.innerHTML = '<span class="spinner"></span> Scanning…';
     guidesResults.innerHTML = '';
     guidesNote.textContent = '';
@@ -401,13 +541,10 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url })
       });
-
       const data = await res.json();
       const items = Array.isArray(data) ? data[0] : data;
-     const list = (items.results || []).filter(r => r.url);
-
+      const list = (items.results || []).filter(r => r.url);
       guidesStatus.innerHTML = '';
-
       if (list.length === 0) {
         guidesResults.innerHTML = '<div class="nothing-found"><i class="ti ti-circle-x" style="color:#ddd;margin-right:6px;"></i>Nothing found</div>';
       } else {
@@ -427,15 +564,12 @@
                   <div class="result-url">${r.url}</div>
                 </div>
                 <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
-              </div>
-            `;
-          }).join('') +
-          '</div>';
+              </div>`;
+          }).join('') + '</div>';
       }
     } catch (e) {
       guidesStatus.innerHTML = '<span class="error-msg"><i class="ti ti-alert-circle"></i> Connection error.</span>';
     }
-
     btn.disabled = false;
     btn.classList.remove('active');
   }
@@ -456,6 +590,7 @@
     btn.disabled = true;
     btn.classList.add('active');
     blogCard.style.display = 'block';
+    updateClearResultsBtn();
     blogStatus.innerHTML = '<span class="spinner"></span> Starting scan…';
     blogResults.innerHTML = '';
     blogNote.textContent = 'Search may take up to 3 minutes';
@@ -483,20 +618,16 @@
       function renderResults() {
         const doneCount = Object.values(jobState).filter(s => s.done).length;
         const allDone = doneCount === 3;
-
         if (!allDone) {
           blogStatus.innerHTML = `<span class="spinner"></span> Scanning… (${doneCount} / 3 parts done)`;
           return;
         }
-
         btn.disabled = false;
         btn.classList.remove('active');
         blogPollIntervals.forEach(id => clearInterval(id));
         blogPollIntervals = [];
-
         const allResults = Object.values(jobState).flatMap(s => s.results);
         blogNote.textContent = '';
-
         if (allResults.length === 0) {
           blogStatus.innerHTML = '';
           blogResults.innerHTML = '<div class="nothing-found"><i class="ti ti-circle-x" style="color:#ddd;margin-right:6px;"></i>Nothing found</div>';
@@ -514,9 +645,7 @@
                   <div class="result-url">${r.url}</div>
                 </div>
                 <a href="${r.url}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>
-              </div>
-            `).join('') +
-            '</div>';
+              </div>`).join('') + '</div>';
         }
       }
 
@@ -543,6 +672,7 @@
       btn.classList.remove('active');
     }
   }
+
   async function checkEmail() {
     const url = urlInput.value.trim();
     if (!url) { alert('Please enter a link first'); return; }
@@ -558,6 +688,7 @@
     btn.disabled = true;
     btn.classList.add('active');
     emailCard.style.display = 'block';
+    updateClearResultsBtn();
     emailStatus.innerHTML = '<span class="spinner"></span> Starting scan…';
     emailResults.innerHTML = '';
     emailNote.textContent = 'Search may take a few minutes';
@@ -568,7 +699,6 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url })
       });
-
       const data = await res.json();
       const jobId = data.jobId;
       if (!jobId) throw new Error('Missing jobId');
@@ -580,15 +710,12 @@
           const statusRes = await fetch(`https://n8n.macpaw.dev/webhook/blog-status?jobId=${jobId}`);
           const statusData = await statusRes.json();
           const job = Array.isArray(statusData) ? statusData[0] : statusData;
-
           if (job && job.status === 'done') {
             clearInterval(emailPollInterval);
             btn.disabled = false;
             btn.classList.remove('active');
-
             const list = job.results ? JSON.parse(job.results) : [];
             emailNote.textContent = '';
-
             if (list.length === 0) {
               emailStatus.innerHTML = '';
               emailResults.innerHTML = '<div class="nothing-found"><i class="ti ti-circle-x" style="color:#ddd;margin-right:6px;"></i>Nothing found</div>';
@@ -600,15 +727,13 @@
                 '<div class="results">' +
                 list.map(r => `
                   <div class="result-card">
-                    <span class="source-badge" style="background:rgba(255,204,0,0.15);color:#996600;">Email</span>
+                    <span class="source-badge badge-email">Email</span>
                     <div class="result-info">
                       <div class="result-title">${r.name || r.previewUrl}</div>
                       <div class="result-url">${r.previewUrl || ''}</div>
                     </div>
                     ${r.previewUrl ? `<a href="${r.previewUrl}" class="result-link" target="_blank"><i class="ti ti-external-link"></i></a>` : ''}
-                  </div>
-                `).join('') +
-                '</div>';
+                  </div>`).join('') + '</div>';
             }
           }
         } catch (e) {}
