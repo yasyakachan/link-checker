@@ -44,6 +44,8 @@
       margin-bottom: 6px;
     }
 
+    .search-row { margin-bottom: 1.25rem; }
+
     .search-wrap input {
       width: 100%;
       height: 48px;
@@ -125,9 +127,7 @@
 
     .info-popover {
       display: none;
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
+      position: fixed;
       width: 300px;
       background: #fff;
       border: 1px solid #e8e8e8;
@@ -137,7 +137,7 @@
       color: #555;
       line-height: 1.6;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      z-index: 100;
+      z-index: 1000;
       text-align: left;
     }
 
@@ -330,6 +330,23 @@
     .result-link:hover { color: #FF00AA; }
 
     .nothing-found { font-size: 13px; color: #bbb; padding: 0.5rem 0; }
+
+    .email-progress-wrap {
+      width: 100%;
+      height: 4px;
+      background: #f0f0f0;
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .email-progress-bar {
+      height: 100%;
+      background: #FF00AA;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 1s linear;
+    }
     .error-msg { color: #cc0000; font-size: 13px; }
   </style>
 </head>
@@ -340,11 +357,31 @@
   <h1 class="page-title">Where is this link used?</h1>
 </div>
 
-<div class="search-wrap">
-  <input type="text" id="urlInput" placeholder="https://setapp.com/apps/lazyreel" />
-  <button class="clear-btn" id="clearBtn" onclick="clearInput()" title="Clear">
-    <i class="ti ti-x" style="font-size:16px;"></i>
-  </button>
+<div class="search-row" style="display:flex;align-items:center;gap:8px;width:100%;max-width:720px;margin-bottom:6px;">
+  <div class="search-wrap" style="margin-bottom:0;flex:1;">
+    <input type="text" id="urlInput" placeholder="https://setapp.com/apps/lazyreel" />
+    <button class="clear-btn" id="clearBtn" onclick="clearInput()" title="Clear">
+      <i class="ti ti-x" style="font-size:16px;"></i>
+    </button>
+  </div>
+  <div style="position:relative;flex-shrink:0;">
+    <button class="info-btn" onclick="toggleInfo('searchInfo', event)" style="width:22px;height:22px;font-size:12px;">i
+      <div class="info-popover" id="searchInfo" style="right:0;left:auto;width:320px;">
+        <strong>How search works</strong>
+        The search looks for an exact substring match — it finds the URL wherever it appears in the text, including when followed by query parameters.<br><br>
+        For example, if you enter <code>https://setapp.com</code>, the search will find:<br>
+        <ul style="margin-top:4px;">
+          <li><code>https://setapp.com</code></li>
+          <li><code>https://setapp.com?utm=123</code></li>
+        </ul>
+        But it will <strong>not</strong> find:<br>
+        <ul style="margin-top:4px;">
+          <li><code>https://setapp.com/membership</code> — enter the full path instead</li>
+          <li><code>www.setapp.com</code> — enter exactly as it appears</li>
+        </ul>
+      </div>
+    </button>
+  </div>
 </div>
 
 
@@ -371,11 +408,11 @@
   <div class="card-header">
     <div class="card-title-wrap">
       <div class="card-title"><span class="dot dot-rm"></span> Guides</div>
-      <div class="card-subtitle">support.setapp.com · setapp.com/developer</div>
+      <div class="card-subtitle">support.setapp.com · docs.setapp.com</div>
     </div>
     <div class="card-header-right">
       <span class="card-note" id="guidesNote"></span>
-      <button class="info-btn" onclick="toggleInfo('guidesInfo')">i
+      <button class="info-btn" onclick="toggleInfo('guidesInfo', event)">i
         <div class="info-popover" id="guidesInfo">
           <strong>How search works</strong>
           Searches for an exact match of the URL you enter. Everything after <code>?</code> is ignored.<br>Enter the link exactly as it appears — <code>https://setapp.com</code>, not <code>www.setapp.com</code>.
@@ -383,7 +420,7 @@
           <strong>Sources</strong>
           <ul>
             <li>Knowledge Base — support.setapp.com</li>
-            <li>Developer Guide — setapp.com/developer</li>
+            <li>Developer Guide — docs.setapp.com</li>
           </ul>
         </div>
       </button>
@@ -404,11 +441,8 @@
     </div>
     <div class="card-header-right">
       <span class="card-note" id="blogNote"></span>
-      <button class="info-btn" onclick="toggleInfo('blogInfo')">i
+      <button class="info-btn" onclick="toggleInfo('blogInfo', event)">i
         <div class="info-popover" id="blogInfo">
-          <strong>How search works</strong>
-          Searches for an exact match of the URL you enter. Everything after <code>?</code> is ignored.<br>Enter the link exactly as it appears — <code>https://setapp.com</code>, not <code>www.setapp.com</code>.
-          <hr>
           <strong>Sources</strong>
           <ul>
             <li>setapp.com/how-to</li>
@@ -418,6 +452,9 @@
             <li>setapp.com/tech-talks</li>
           </ul>
           Scans up to 1,500 articles in 3 parallel batches.
+          <hr>
+          <strong>Contact</strong>
+          @olena.khodos
         </div>
       </button>
     </div>
@@ -437,16 +474,16 @@
     </div>
     <div class="card-header-right">
       <span class="card-note" id="emailNote"></span>
-      <button class="info-btn" onclick="toggleInfo('emailInfo')">i
+      <button class="info-btn" onclick="toggleInfo('emailInfo', event)">i
         <div class="info-popover" id="emailInfo">
-          <strong>How search works</strong>
-          Searches for an exact match of the URL you enter. Everything after <code>?</code> is ignored.<br>Enter the link exactly as it appears — <code>https://setapp.com</code>, not <code>www.setapp.com</code>.
-          <hr>
           <strong>Sources</strong>
           <ul>
             <li>All email templates stored in Stripo (~500)</li>
           </ul>
           Note: only links written directly in the template are found. Links inserted via snippets or dynamic variables are not searchable.
+          <hr>
+          <strong>Contact</strong>
+          @olga.ya
         </div>
       </button>
     </div>
@@ -460,12 +497,22 @@
 <script>
   let blogPollIntervals = [];
 
-  function toggleInfo(id) {
+  function toggleInfo(id, event) {
+    event = event || window.event;
+    const btn = event ? event.currentTarget || event.target.closest('.info-btn') : null;
     const popover = document.getElementById(id);
     const isVisible = popover.classList.contains('visible');
-    // Close all popovers
     document.querySelectorAll('.info-popover').forEach(p => p.classList.remove('visible'));
-    if (!isVisible) popover.classList.add('visible');
+    if (!isVisible) {
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        popover.style.top = (rect.bottom + 8) + 'px';
+        const right = window.innerWidth - rect.right;
+        popover.style.right = right + 'px';
+        popover.style.left = 'auto';
+      }
+      popover.classList.add('visible');
+    }
   }
 
   // Close popovers when clicking outside
@@ -691,7 +738,7 @@
     updateClearResultsBtn();
     emailStatus.innerHTML = '<span class="spinner"></span> Starting scan…';
     emailResults.innerHTML = '';
-    emailNote.textContent = 'Search may take a few minutes';
+    emailNote.textContent = 'Search may take up to 20 minutes';
 
     try {
       const res = await fetch('https://n8n.macpaw.dev/webhook/email-scanner', {
@@ -704,6 +751,23 @@
       if (!jobId) throw new Error('Missing jobId');
 
       emailStatus.innerHTML = '<span class="spinner"></span> Scanning emails…';
+      // Start animated progress bar (20 min = 1200s target)
+      const progressWrap = document.createElement('div');
+      progressWrap.className = 'email-progress-wrap';
+      progressWrap.id = 'emailProgressWrap';
+      const progressBar = document.createElement('div');
+      progressBar.className = 'email-progress-bar';
+      progressBar.id = 'emailProgressBar';
+      progressWrap.appendChild(progressBar);
+      emailStatus.parentNode.insertBefore(progressWrap, emailStatus.nextSibling);
+      const startTime = Date.now();
+      const totalMs = 20 * 60 * 1000;
+      const progressInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const pct = Math.min(95, (elapsed / totalMs) * 100);
+        progressBar.style.width = pct + '%';
+      }, 2000);
+      const origPollInterval = emailPollInterval;
 
       emailPollInterval = setInterval(async () => {
         try {
@@ -712,6 +776,11 @@
           const job = Array.isArray(statusData) ? statusData[0] : statusData;
           if (job && job.status === 'done') {
             clearInterval(emailPollInterval);
+            clearInterval(progressInterval);
+            const pw = document.getElementById('emailProgressWrap');
+            const pb = document.getElementById('emailProgressBar');
+            if (pb) pb.style.width = '100%';
+            if (pw) setTimeout(() => pw.remove(), 600);
             btn.disabled = false;
             btn.classList.remove('active');
             const list = job.results ? JSON.parse(job.results) : [];
